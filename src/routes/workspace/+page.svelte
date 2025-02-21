@@ -1,5 +1,6 @@
 <script lang="ts">
     import Header from '$components/header.svelte';
+    import Toolbar from '$components/toolbar.svelte';
     import loadingStore from '$stores/loadingStore.js';
     import { onMount } from 'svelte';
 
@@ -39,6 +40,8 @@
     </div>
 </Header>
 
+<Toolbar />
+
 
 
 
@@ -55,8 +58,6 @@
         .history-btn {
             width: 44px;
             height: 100%;
-            outline: none;
-            border: none;
             font-size: 2rem;
             display: flex;
             justify-content: center;
