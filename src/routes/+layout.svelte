@@ -64,8 +64,7 @@
         width: 100%;
         height: 100%;
         min-width: 1240px;
-        min-height: 800px;
-        overflow: scroll;
+        min-height: 1024px;
 
 
 
@@ -75,6 +74,7 @@
             margin: 0 auto;
         }
 
+        :global(.bd-r-5) { border-radius: 5px; }
         :global(.bd-r-10) { border-radius: 10px; }
 
         :global(.font-B) { font-family: "NanumSquareRoundBold"; }
@@ -85,8 +85,10 @@
 
         :global(.bg-fff) { background-color: #ffffff; }
         :global(.bg-blue) { background-color: #04a9f5; }
+        :global(.bg-base) { background-color: #edf8fe; }
 
         :global(.shadow) { box-shadow: 0 0 4px rgba($color: #000000, $alpha: 0.4); }
+        :global(.shadow-light) { box-shadow: 0 0 4px rgba($color: #000000, $alpha: 0.25); }
         :global(.shadow-10) { box-shadow: 0 0 10px rgba($color: #000000, $alpha: 0.4); }
     }
 </style>

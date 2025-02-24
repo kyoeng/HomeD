@@ -35,6 +35,7 @@
         justify-content: flex-start;
         align-items: center;
         position: relative;
+        z-index: 10000;
 
 
         #title {

@@ -1,6 +1,8 @@
 <script lang="ts">
     import Header from '$components/header.svelte';
-    import Toolbar from '$components/toolbar.svelte';
+    import OptionBar from '$components/workspace/optionBar.svelte';
+    import Three from '$components/workspace/three.svelte';
+    import Toolbar from '$components/workspace/toolbar.svelte';
     import loadingStore from '$stores/loadingStore.js';
     import { onMount } from 'svelte';
 
@@ -41,8 +43,9 @@
 </Header>
 
 <Toolbar />
+<OptionBar />
 
-
+<Three />
 
 
 
