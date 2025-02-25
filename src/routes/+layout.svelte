@@ -77,6 +77,11 @@
         :global(.bd-r-5) { border-radius: 5px; }
         :global(.bd-r-10) { border-radius: 10px; }
 
+        :global(.bd) { border: 1px solid rgba($color: #000000, $alpha: 0.23); }
+        :global(.bd-thick) { border: 1px solid rgba($color: #000000, $alpha: 23); }
+        :global(.bd-blue) { border: 1px solid rgba($color: #04a9f5, $alpha: 1); }
+        :global(.bd-blue-thick) { border: 1px solid rgba($color: #04a9f5, $alpha: 1); }
+
         :global(.font-B) { font-family: "NanumSquareRoundBold"; }
         :global(.font-EB) { font-family: "NanumSquareRoundExtraBold"; }
 

@@ -50,6 +50,19 @@ button {
   outline: none;
   border: none;
 }
+input {
+  outline: none;
+  border: none;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input:focus {
+  outline: none;
+  border: none;
+}
 html,
 body {
   width: 100%;
@@ -63,6 +76,7 @@ html,
 body * {
   font-family: "NanumSquareRoundLight";
 	font-size: 10px;
+  box-sizing: border-box;
 }
 
 
