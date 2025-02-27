@@ -1,6 +1,7 @@
 <script lang="ts">
     import Header from '$components/header.svelte';
     import BuildCategory from '$components/workspace/buildCategory.svelte';
+    import ControlBar from '$components/workspace/controlBar.svelte';
     import OptionBar from '$components/workspace/optionBar.svelte';
     import Three from '$components/workspace/three.svelte';
     import Toolbar from '$components/workspace/toolbar.svelte';
@@ -14,11 +15,6 @@
 
     // props
     let { data } = $props();
-
-    // history state
-    let prevState = $state(false);
-    let nextState = $state(false);
-
 
 
     // onMount()
@@ -36,6 +32,7 @@
 
 <Toolbar />
 <OptionBar />
+<ControlBar />
 
 
 {#if $categoryStateStore === "build"}

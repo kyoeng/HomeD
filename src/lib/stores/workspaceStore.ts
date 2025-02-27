@@ -34,14 +34,17 @@ interface ThreeStoreType {
     controls: OrbitControls;
     light: THREE.Light;
     grid: THREE.GridHelper;
-    raycaster: THREE.Raycaster;
-    mouse: THREE.Vector2;
-    focusObject: any,
-    offset: THREE.Vector3;
+    plate: THREE.Mesh;
+    isDragMode: boolean;
+    focusEffect: THREE.BoxHelper | null;
+    focusObject: any;
+    objectList: {build: Array<any>, furniture: Array<any>};
+    mousePosition: null | {x: number, z: number};
 };
 
 /**
  * THREE JS STORE
+ * Three js 조작용 store
  */
 function createThreeStore() {
     const { subscribe, update, set } = writable<ThreeStoreType | null>(null);
@@ -66,7 +69,7 @@ function createThreeStore() {
                         0.1,
                         1000
                     );
-                    camera.position.set(0, 25, 0);
+                    camera.position.set(5, 5, 5);
                     camera.lookAt(0, 0, 0);
 
                     // Renderer 설정
@@ -91,6 +94,13 @@ function createThreeStore() {
                     const grid = new THREE.GridHelper(100, 100, 0xcccccc, 0xcccccc);
                     scene.add(grid);
 
+                    // 기준 plate 생성
+                    const plateGeometry = new THREE.PlaneGeometry(100, 100);
+                    const plateMaterial = new THREE.MeshBasicMaterial({ visible: false });
+                    const plate = new THREE.Mesh(plateGeometry, plateMaterial);
+                    plate.rotation.x = -Math.PI / 2; // 평면을 수평으로 회전
+                    scene.add(plate);
+
                     // animation 시작
                     function animate() { renderer.render(scene, camera); }
                     renderer.setAnimationLoop(animate);
@@ -103,10 +113,12 @@ function createThreeStore() {
                         controls,
                         light,
                         grid,
-                        raycaster: new THREE.Raycaster(),
-                        mouse: new THREE.Vector2,
+                        plate,
+                        isDragMode: false,
+                        focusEffect: null,
                         focusObject: null,
-                        offset: new THREE.Vector3()
+                        objectList: {build: [], furniture: []},
+                        mousePosition: null
                     });
                     resolve(true);
 
@@ -134,12 +146,141 @@ function createThreeStore() {
             });
         },
         /**
+         * keydown 이벤트 함수
+         * @param e KeyboardEvent
+         */
+        keydownEvt: (e: KeyboardEvent) => {
+            if (e.key === "Control" || e.key === "Shift") {
+                update((store) => {
+                    const clone = store as ThreeStoreType;
+                    clone.controls.enabled = false;
+
+                    switch (e.key) {
+                        case "Control":
+                            clone.isDragMode = true;
+                            clone.camera.position.set(0, 5, 0);
+                            clone.camera.lookAt(0, 0, 0);
+                            break;
+                    
+                        case "Shift":
+                            if (clone.focusObject) {
+                                clone.focusObject.rotation.y += Math.PI / 2;
+                                clone.focusEffect?.update()
+                            }
+                            break;
+                    
+                        default:
+                            break;
+                    }
+
+                    return clone;
+                });
+            }
+        },
+        /**
+         * keyup 이벤트 함수
+         * @param e KeyboardEvent
+         */
+        keyupEvt: (e: KeyboardEvent) => {
+            if (e.key === "Control" || e.key === "Shift") {
+                update((store) => {
+                    const clone = store as ThreeStoreType;
+                    clone.controls.enabled = true;
+                    clone.isDragMode = false;
+                    return clone;
+                });
+            }
+        },
+        /**
+         * 포커스 오브젝트 변경 함수
+         * @param obj any
+         */
+        changeFocusObj: (obj: any) => {
+            update((store) => {
+                const clone = store as ThreeStoreType;
+                
+                // 이전에 있던 포커스 이펙트 지우기
+                if (clone.focusEffect) {
+                    clone.scene.remove(clone.focusEffect);
+                    clone.focusEffect.geometry.dispose();
+                    clone.focusEffect.material.dispose();
+                    clone.focusEffect = null;
+                }
+
+                // null이거나 같은 오브젝트가 들어온 경우
+                if (obj === null || obj === clone.focusObject) {
+                    clone.focusObject = null;
+                    return clone;
+                }
+
+                // 포커스 오브젝트 교체
+                clone.focusEffect = new THREE.BoxHelper(obj, 0xffff00);
+                clone.scene.add(clone.focusEffect);
+                clone.focusObject = obj;
+
+                return clone;
+            });
+        },
+        /**
+         * mousedown 이벤트 함수
+         * @param e MouseEvent
+         */
+        mousedownEvt: (e: MouseEvent) => {
+            update((store) => {
+                const clone = store as ThreeStoreType;
+                
+                if (!clone.focusObject || !clone.isDragMode) return clone;
+
+                console.log("down on");
+
+                // 마우스 위치 값 저장
+                clone.mousePosition = {
+                    x: Math.floor(e.clientX),
+                    z: Math.floor(e.clientY)
+                };
+
+                return clone;
+            });
+        },
+        /**
+         * mousemove 이벤트 함수
+         * @param e MouseEvent
+         */
+        mousemoveEvt: (e: MouseEvent) => {
+            update((store) => {
+                const clone = store as ThreeStoreType;
+                if (!clone.focusObject || !clone.mousePosition || !clone.isDragMode) return clone;
+
+                clone.focusObject.position.x += (Math.floor(e.clientX) - clone.mousePosition.x) * 0.1;
+                clone.focusObject.position.z += (Math.floor(e.clientY) - clone.mousePosition.z) * 0.1;
+                clone.focusEffect?.update();
+
+                // 마우스 위치 값 저장
+                clone.mousePosition = {
+                    x: Math.floor(e.clientX),
+                    z: Math.floor(e.clientY)
+                };
+
+                return clone;
+            });
+        },
+        /**
+         * mouseup 이벤트 함수
+         * @param e MouseEvent
+         */
+        mouseupEvt: (e: MouseEvent) => {
+            update((store) => {
+                const clone = store as ThreeStoreType;
+                clone.mousePosition = null;
+                return clone;
+            });
+        },
+        /**
          * grid on off 함수
          */
         gridOnOff: () => {
             update((store) => {
                 const clone = store as ThreeStoreType;
-
                 clone.grid.visible = !clone.grid.visible;
                 return clone;
             });
@@ -150,8 +291,7 @@ function createThreeStore() {
         cameraCenterView: () => {
             update((store) => {
                 const clone = store as ThreeStoreType;
-
-                clone.camera.position.set(0, 25, 0);
+                clone.camera.position.set(5, 5, 5);
                 clone.camera.lookAt(0, 0, 0);
                 return clone;
             });
@@ -160,17 +300,52 @@ function createThreeStore() {
          * 바닥 생성 함수
          * @param x number
          * @param z number
+         * @param name string
          */
-        createFloor: (x: number, z: number) => {
+        createFloor: (x: number, z: number, name: string) => {
+            update((store) => {
+                const clone = store as ThreeStoreType;
+                const boxGeometry = new THREE.BoxGeometry(x, 0.1, z);
+                const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xfffaf0 });
+                const box = new THREE.Mesh(boxGeometry, boxMaterial);
+
+                box.position.y = 0.05;
+                box.name = name;
+
+                clone.scene.add(box);
+                clone.objectList.build.push(box);
+
+                return clone;
+            });
+        },
+        /**
+         * 벽 생성 함수
+         * @param x number
+         * @param y number
+         * @param z number
+         * @param name string
+         */
+        createWall: (x: number, y:number, z: number, name: string) => {
             update((store) => {
                 const clone = store as ThreeStoreType;
 
-                const boxGeometry = new THREE.BoxGeometry(x, 0.1, z);
-                const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const boxGeometry = new THREE.BoxGeometry(x, y, z);
+                const boxMaterial = [
+                    new THREE.MeshBasicMaterial({ color: 0x414141 }),
+                    new THREE.MeshBasicMaterial({ color: 0x414141 }),
+                    new THREE.MeshBasicMaterial({ color: 0x414141 }),
+                    new THREE.MeshBasicMaterial({ color: 0x414141 }),
+                    new THREE.MeshBasicMaterial({ color: 0xfffaf0 }),
+                    new THREE.MeshBasicMaterial({ color: 0x414141 }),
+                ]
                 const box = new THREE.Mesh(boxGeometry, boxMaterial);
-                box.position.y = 0.1;
-                clone.scene.add(box);
 
+                box.position.y = y / 2;
+                box.name = name;
+
+                clone.scene.add(box);
+                clone.objectList.build.push(box);
+                
                 return clone;
             });
         }

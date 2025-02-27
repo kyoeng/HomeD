@@ -27,14 +27,15 @@
 
 <style lang="scss">
     #header {
-        position: relative;
+        position: fixed;
+        left: 0;
+        top: 0;
         width: 100%;
         height: 60px;
         padding: 8px;
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        position: relative;
         z-index: 10000;
 
 

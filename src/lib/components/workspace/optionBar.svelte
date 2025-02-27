@@ -21,7 +21,7 @@
 
 <style lang="scss">
     #option-container {
-        position: fixed;
+        position: absolute;
         right: 15px;
         top: 75px;
         padding: 5px;

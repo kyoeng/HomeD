@@ -6,6 +6,7 @@
     import wallIcon from "$assets/images/wall-icon.svg";
     import selectWallIcon from "$assets/images/wall-icon-select.svg";
     import { threeStore } from "$stores/workspaceStore";
+    import { parse } from "svelte/compiler";
 
 
 
@@ -13,9 +14,10 @@
     let selectState = $state<string | null>(null);
 
     // input state
-    let x = $state<number | null>(null);
-    let y = $state<number | null>(null);
-    let z = $state<number | null>(null);
+    let name = $state<string>('');
+    let x = $state<string>('');
+    let y = $state<string>('');
+    let z = $state<string>('');
 
 
     // build btn click 이벤트
@@ -24,33 +26,34 @@
 
         if (selectState !== btnType) selectState = btnType;
         else selectState = null;
-
-        x = null;
-        y = null;
-        z = null;
     };
 
 
     // input oninput 이벤트
     const oninputEvt = (e: Event, type: string) => {
-        const onlyNumbers = /^[0-9]+$/;
         const inputEl = e.target as HTMLInputElement;
+        const onlyNumbers = /^[0-9]+(\.[0-9]*)?$/;
+
+        if (type === "name") {
+            name = inputEl.value;
+            return;
+        }
 
         if (!onlyNumbers.test(inputEl.value)) {
-            inputEl.value = inputEl.value.replace(/[^0-9]/g, '');
+            inputEl.value = inputEl.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\./g, '$1');
         }
 
         switch (type) {
             case 'x':
-                x = parseInt(inputEl.value, 10);
+                x = inputEl.value;
                 break;
         
             case 'y':
-                y = parseInt(inputEl.value, 10);
+                y = inputEl.value;
                 break;
         
             case 'z':
-                z = parseInt(inputEl.value, 10);
+                z = inputEl.value;
                 break;
         
             default:
@@ -61,8 +64,43 @@
 
     // 생성 버튼 click 이벤트
     const create = () => {
+        const parseX = parseFloat(x);
+        const parseY = parseFloat(y);
+        const parseZ = parseFloat(z);
+
+        if (name.length <= 0 || parseX <= 0 || parseZ <= 0 || isNaN(parseX) || isNaN(parseZ)) return;
+        if ((selectState === "room" || selectState === "wall") && parseY <= 0 && isNaN(parseY)) return;
+
+        switch (selectState) {
+            case "room":
+                
+                break;
         
+            case "floor":
+                threeStore.createFloor(parseX, parseZ, name);
+                break;
+        
+            case "wall":
+                threeStore.createWall(parseX, parseY, parseZ, name);
+                break;
+        
+            default:
+                break;
+        }
+
+        selectState = null;
     }
+
+
+    // effect()
+    $effect(() => {
+        if (selectState === null) {
+            name = '';
+            x = '';
+            y = '';
+            z = '';
+        }
+    });
 </script>
 
 
@@ -99,52 +137,67 @@
             {#if selectState === "room"}
                 <p class="area-title font-EB">방&#40;Room&#41; 생성</p>
 
+                <p class="input-name">이름</p>
+                <div class="input-box">
+                    <input class="bd" type="text" placeholder="이름" oninput={(e) => oninputEvt(e, 'name')}>
+                </div>
+
                 <p class="input-name">가로</p>
                 <div class="input-box">
-                    <input class="bd" type="text" placeholder="cm" oninput={(e) => oninputEvt(e, 'x')}>
+                    <input class="bd" type="text" placeholder="단위(m)" oninput={(e) => oninputEvt(e, 'x')}>
                 </div>
 
                 <p class="input-name">세로</p>
                 <div class="input-box">
-                    <input class="bd" type="number" placeholder="cm">
+                    <input class="bd" type="text" placeholder="단위(m)" oninput={(e) => oninputEvt(e, 'z')}>
                 </div>
 
                 <p class="input-name">높이</p>
                 <div class="input-box">
-                    <input class="bd" type="number" placeholder="cm">
+                    <input class="bd" type="text" placeholder="단위(m)" oninput={(e) => oninputEvt(e, 'y')}>
                 </div>
             {/if}
 
             {#if selectState === "floor"}
                 <p class="area-title font-EB">바닥&#40;Floor&#41; 생성</p>
 
+                <p class="input-name">이름</p>
+                <div class="input-box">
+                    <input class="bd" type="text" placeholder="이름" oninput={(e) => oninputEvt(e, 'name')}>
+                </div>
+
                 <p class="input-name">가로</p>
                 <div class="input-box">
-                    <input class="bd" type="number"  placeholder="cm">
+                    <input class="bd" type="text"  placeholder="단위(m)" oninput={(e) => oninputEvt(e, 'x')}>
                 </div>
 
                 <p class="input-name">세로</p>
                 <div class="input-box">
-                    <input class="bd" type="number" placeholder="cm">
+                    <input class="bd" type="text" placeholder="단위(m)" oninput={(e) => oninputEvt(e, 'z')}>
                 </div>
             {/if}
 
             {#if selectState === "wall"}
                 <p class="area-title font-EB">벽&#40;Wall&#41; 생성</p>
 
+                <p class="input-name">이름</p>
+                <div class="input-box">
+                    <input class="bd" type="text" placeholder="이름" oninput={(e) => oninputEvt(e, 'name')}>
+                </div>
+
                 <p class="input-name">길이</p>
                 <div class="input-box">
-                    <input class="bd" type="number"  placeholder="cm">
+                    <input class="bd" type="text"  placeholder="단위(m)" oninput={(e) => oninputEvt(e, 'x')}>
                 </div>
 
                 <p class="input-name">높이</p>
                 <div class="input-box">
-                    <input class="bd" type="number" placeholder="cm">
+                    <input class="bd" type="text" placeholder="단위(m)" oninput={(e) => oninputEvt(e, 'y')}>
                 </div>
 
                 <p class="input-name">두께</p>
                 <div class="input-box">
-                    <input class="bd" type="number" placeholder="cm">
+                    <input class="bd" type="text" placeholder="단위(m)" oninput={(e) => oninputEvt(e, 'z')}>
                 </div>
             {/if}
 
@@ -164,7 +217,7 @@
 
 <style lang="scss">
     #build-container {
-        position: fixed;
+        position: absolute;
         left: 100px;
         top: 75px;
         width: 250px;
@@ -254,7 +307,7 @@
                         flex: 1;
                         height: 100%;
                         padding: 5px 10px;
-                        font-size: 1.4rem;
+                        font-size: 1.3rem;
                     }
                 }
 

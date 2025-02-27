@@ -20,11 +20,23 @@
         }
 
         window.addEventListener("resize", () => threeStore.resizeEvt(container));
+        window.addEventListener("keydown", threeStore.keydownEvt);
+        window.addEventListener("keyup", threeStore.keyupEvt);
+        $threeStore?.renderer.domElement.addEventListener("mousedown", threeStore.mousedownEvt);
+        $threeStore?.renderer.domElement.addEventListener("mousemove", threeStore.mousemoveEvt);
+        $threeStore?.renderer.domElement.addEventListener("mouseup", threeStore.mouseupEvt);
     });
 
     // onDestroy()
     onDestroy(() => {
-        window.removeEventListener("resize", () => threeStore.resizeEvt(container));
+        if (!errState) {
+            window.removeEventListener("resize", () => threeStore.resizeEvt(container));
+            window.removeEventListener("keydown", threeStore.keydownEvt);
+            window.removeEventListener("keyup", threeStore.keyupEvt);
+            $threeStore?.renderer.domElement.removeEventListener("mousedown", threeStore.mousedownEvt);
+            $threeStore?.renderer.domElement.removeEventListener("mousemove", threeStore.mousemoveEvt);
+            $threeStore?.renderer.domElement.removeEventListener("mouseup", threeStore.mouseupEvt);
+        }
     });
 </script>
 
@@ -32,7 +44,7 @@
 
 
 {#if errState}
-    <p id="err-info" class="bg-base font-EB">
+    <p id="err-info" class="bg-base font-B">
         에러가 발생했습니다. 다시 시도해주세요.
     </p>
 {/if}

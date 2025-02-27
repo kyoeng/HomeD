@@ -3,6 +3,8 @@
     import selectBuildIcon from "$assets/images/build-icon-select.svg";
     import furnitureIcon from "$assets/images/furniture-icon.svg";
     import selectFurnitureIcon from "$assets/images/furniture-icon-select.svg";
+    import infoIcon from "$assets/images/info-icon.svg";
+    import selectInfoIcon from "$assets/images/info-icon-select.svg";
     import { categoryStateStore } from "$stores/workspaceStore";
 
 
@@ -31,6 +33,11 @@
         <img src="{$categoryStateStore === "furniture" ? selectFurnitureIcon : furnitureIcon}" alt="furniture-icon">
         가구
     </button>
+
+    <button class="tool-btn bg-fff font-EB bd-r-10" class:select={$categoryStateStore === "info"} 
+    data-type="info" onclick={btnClickEvt}>
+        <img id="info-img" src="{$categoryStateStore === "info" ? selectInfoIcon : infoIcon}" alt="furniture-icon">
+    </button>
 </div>
 
 
@@ -39,7 +46,7 @@
 
 <style lang="scss">
     #toolbar-container {
-        position: fixed;
+        position: absolute;
         left: 15px;
         top: 75px;
         width: 70px;
@@ -63,6 +70,12 @@
             img {
                 width: 23px;
                 height: 23px;
+            }
+
+
+            #info-img {
+                width: 40px;
+                height: 40px;
             }
         }
         .tool-btn.select {
